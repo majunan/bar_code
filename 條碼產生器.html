@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>條碼生成器 - EAN13 & Code128</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #e6f7ff 0%, #cce6ff 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 15px;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .container {
+            background-color: rgba(255, 255, 255, 0.97);
+            border-radius: 16px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+            width: 100%;
+            max-width: 500px;
+            padding: 25px 20px;
+            text-align: center;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        header {
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 1rem;
+            margin-bottom: 20px;
+        }
+        
+        .card {
+            background: linear-gradient(120deg, #ffffff, #f5f7fa);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            margin-bottom: 20px;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            font-weight: 500;
+            font-size: 1rem;
+        }
+        
+        select, input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e6ed;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            background-color: #fff;
+            -webkit-appearance: none;
+            min-height: 50px;
+        }
+        
+        select:focus, input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+        
+        button {
+            background: linear-gradient(to right, #3498db, #2c3e50);
+            color: white;
+            border: none;
+            padding: 16px;
+            font-size: 1.1rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            min-height: 50px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+            width: 100%;
+            margin: 8px 0;
+        }
+        
+        button:active {
+            transform: scale(0.98);
+        }
+        
+        .barcode-container {
+            background-color: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            min-height: 180px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            margin-bottom: 15px;
+        }
+        
+        #barcode-img {
+            max-width: 100%;
+            height: auto;
+            max-height: 120px;
+            margin: 10px 0;
+        }
+        
+        .barcode-placeholder {
+            color: #95a5a6;
+            font-size: 1rem;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .instructions {
+            background: #e3f2fd;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            border-radius: 0 8px 8px 0;
+            text-align: left;
+            margin-top: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .instructions h3 {
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+        
+        .instructions ul {
+            padding-left: 18px;
+        }
+        
+        .instructions li {
+            margin-bottom: 6px;
+            color: #34495e;
+        }
+        
+        .type-info {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 15px;
+        }
+        
+        .type-card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            width: 100%;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            text-align: center;
+        }
+        
+        .type-card h4 {
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+        
+        .type-card p {
+            color: #7f8c8d;
+            font-size: 0.85rem;
+        }
+        
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .download-btn {
+            background: linear-gradient(to right, #27ae60, #2ecc71);
+        }
+        
+        @media screen and (min-width: 500px) {
+            .container {
+                padding: 30px;
+            }
+            
+            .button-group {
+                flex-direction: row;
+            }
+            
+            .type-info {
+                flex-direction: row;
+            }
+            
+            .type-card {
+                width: 48%;
+            }
+        }
+        
+        input, select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+        
+        input[type="number"] {
+            inputmode: numeric;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>條碼生成器</h1>
+            <div class="subtitle">生成條碼後，使用PDA掃描，確認產品層架位置！</div>
+        </header>
+        
+        <div class="card">
+            <div class="input-group">
+                <label for="barcodeType">選擇條碼類型</label>
+                <select id="barcodeType">
+                  <option value="ean13">EAN-13</option>  
+                                <option value="code128">Code 128</option>                    
+                </select>
+            </div>
+            
+            <div class="input-group">
+                <label for="barcodeContent">輸入條碼內容</label>
+                <input type="text" id="barcodeContent" placeholder="請輸入條碼內容..." inputmode="numeric">
+            </div>
+            
+            <div class="button-group">
+                <button id="generateBtn">生成條碼</button>
+                <button id="downloadBtn" class="download-btn" disabled>下載條碼 (JPG)</button>
+            </div>
+        </div>
+        
+        <div class="barcode-container">
+            <div class="barcode-placeholder" id="placeholder">
+                條碼將在此處顯示
+            </div>
+            <img id="barcode-img" style="display: none;" alt="生成的條碼">
+            <canvas id="barcode-canvas" style="display: none;"></canvas> 
+        </div>
+        
+        <div class="type-info">
+            <div class="type-card">
+                <h4>EAN-13 條碼</h4>
+                <p>主要用於零售商品，必須是12或13位數字（最後一位是校驗碼）</p>
+            </div>
+            <div class="type-card">
+                <h4>Code 128 條碼</h4>
+                <p>高密度條碼，支援數字、字母和符號，長度可變</p>
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <h3>使用說明：</h3>
+            <ul>
+                <li>選擇條碼類型：EAN-13 或 Code 128</li>
+                <li>在輸入框中輸入條碼內容</li>
+                <li>點擊"生成條碼"按鈕</li>
+                <li>使用"下載條碼"按鈕保存為JPG圖片</li>
+                <li>EAN-13 必須輸入12或13位數字</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const generateBtn = document.getElementById('generateBtn');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const barcodeType = document.getElementById('barcodeType');
+            const barcodeContent = document.getElementById('barcodeContent');
+            const barcodeImg = document.getElementById('barcode-img');
+            const placeholder = document.getElementById('placeholder');
+            const barcodeCanvas = document.getElementById('barcode-canvas'); // 取得 canvas 元素
+            const ctx = barcodeCanvas.getContext('2d'); // 取得 canvas 2D 上下文
+            
+            // 設置默認值
+            barcodeContent.value = barcodeType.value === 'ean13' ? '123456789012' : 'CODE128-EXAMPLE';
+            
+            // 根據類型設置輸入模式
+            function setInputMode() {
+                if (barcodeType.value === 'ean13') {
+                    barcodeContent.setAttribute('inputmode', 'numeric');
+                    barcodeContent.type = 'number';
+                    barcodeContent.pattern = '[0-9]*';
+                } else {
+                    barcodeContent.removeAttribute('inputmode');
+                    barcodeContent.type = 'text';
+                    barcodeContent.pattern = null;
+                }
+            }
+            
+            // 初始設置
+            setInputMode();
+            
+            generateBtn.addEventListener('click', function() {
+                const type = barcodeType.value;
+                const content = barcodeContent.value.trim();
+                
+                if (!content) {
+                    alert('請輸入條碼內容！');
+                    return;
+                }
+                
+                // 對於EAN13，需要數字驗證
+                if (type === 'ean13') {
+                    if (!/^\d{12,13}$/.test(content)) {
+                        alert('EAN-13 條碼必須是12或13位數字！');
+                        return;
+                    }
+                }
+                
+                // 生成條碼
+                try {
+                    // 清空 canvas
+                    ctx.clearRect(0, 0, barcodeCanvas.width, barcodeCanvas.height);
+                    // 重置 canvas 尺寸，JsBarcode 會自動調整
+                    barcodeCanvas.width = 1; 
+                    barcodeCanvas.height = 1;
+
+                    // 生成條碼到 canvas
+                    JsBarcode(barcodeCanvas, content, {
+                        format: type,
+                        displayValue: true,
+                        fontSize: 16,
+                        height: 60,
+                        margin: 10,
+                        background: '#ffffff',
+                    });
+
+                    // 將 canvas 內容轉換為圖片顯示
+                    // 使用 PNG 可以更好地處理條碼的銳利邊緣和透明度（如果背景不是純白）
+                    barcodeImg.src = barcodeCanvas.toDataURL('image/png'); 
+                    
+                    // 顯示圖片並隱藏佔位符
+                    barcodeImg.style.display = 'block';
+                    placeholder.style.display = 'none';
+                    
+                    // 啟用下載按鈕
+                    downloadBtn.disabled = false;
+                    
+                    // 滾動到條碼位置
+                    barcodeImg.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                } catch (error) {
+                    alert('生成條碼時出錯: ' + error.message);
+                    console.error(error);
+                }
+            });
+            
+            // 下載按鈕事件
+            downloadBtn.addEventListener('click', function() {
+                // 檢查 canvas 是否有有效的內容可供下載
+                if (!barcodeCanvas.toDataURL || barcodeCanvas.width <= 1 || barcodeCanvas.height <= 1) { 
+                    alert('請先生成條碼！');
+                    return;
+                }
+                
+                // 直接從 canvas 轉換為 JPG 並下載
+                const jpgFile = barcodeCanvas.toDataURL('image/jpeg', 0.92);
+                const downloadLink = document.createElement('a');
+                downloadLink.download = `${barcodeContent.value}.jpg`; 
+                downloadLink.href = jpgFile;
+                
+                const clickEvent = new MouseEvent('click', {
+                    view: window,
+                    bubbles: true,
+                    cancelable: true
+                });
+                downloadLink.dispatchEvent(clickEvent);
+                
+                if (window.URL) {
+                    window.URL.revokeObjectURL(jpgFile);
+                }
+            });
+            
+            // 切換條碼類型時更新示例內容和輸入模式
+            barcodeType.addEventListener('change', function() {
+                if (this.value === 'ean13') {
+                    barcodeContent.value = '123456789012';
+                    barcodeContent.placeholder = '輸入12或13位數字...';
+                } else {
+                    barcodeContent.value = 'CODE128-EXAMPLE';
+                    barcodeContent.placeholder = '輸入條碼內容...';
+                }
+                setInputMode();
+            });
+            
+            // 初始生成一個條碼
+            setTimeout(() => {
+                generateBtn.click();
+            }, 300);
+        });
+    </script>
+</body>
+</html>
